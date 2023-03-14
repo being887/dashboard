@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+    
+  
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+      }
+      .chartMenu {
+        width: 100vw;
+        height: 40px;
+        background: #1A1A1A;
+        color: rgba(54, 162, 235, 1);
+      }
+      .chartMenu p {
+        padding: 10px;
+        font-size: 20px;
+      }
+     
+     
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+        background: #1A1A1A;
+        color: white;
+        width: 100%;
+        position: fixed;
+        
+      }
+      header .search-bar {
+        flex: 1;
+        margin: 20px 20px;
+        height: 40px;
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+      }
+      header .search-bar input {
+        flex: 1;
+        border: none;
+        outline: none;
+      }
+      header .search-bar button {
+        border: none;
+        background: none;
+        outline: none;
+        cursor: pointer;
+      }
+      header .icons {
+        display: flex;
+        align-items: center;
+      }
+      header .icon {
+        margin: 0 10px;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      .sidebar {
+        position: fixed;
+        font-size: 30px;
+          top: 60px;
+        left: 0;
+        bottom: 0;
+        width: 200px;
+        background: mediumpurple;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar a {
+        margin-bottom: 10px;
+        color: #333;
+        
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .sidebar a:hover{
+        color: #ccc;
+      }
+   
+.chartCard {
+  position: absolute;
+  top: 50px;
+  left: 100px;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: column;
+  margin-left: 10%;
+  
+}
+.chartBox {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+    </style>
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+ 
+  </head>
+  <body>
+    <header>
+      <div class="search-bar">
+        <input type="text" placeholder="Search...">
+        <button><i class="fas fa-search"></i></button>
+      </div>
+      <div class="icons">
+        <div class="icon"><i class="fas fa-user-circle"></i></div>
+        <div class="icon"><i class="fas fa-cog"></i></div>
+      </div>
+    </header>
+    <div class="sidebar">
+      <a href="#">Dashboard</a>
+      <a href="#">Product</a>
+      <a href="#">Sales </a>
+      <a href="#">trends</a>
+       <a href="#">Settings</a>
+      
+    </div>
+
+       
+     
+
+    
+    <div class="chartCard">
+      <div class="chartBox" >
+        <canvas id="myChart" ></canvas>
+       </div>
+       <div class="chartBox" >
+        <canvas id="myChart2" ></canvas>
+       </div>
+    </div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+    <script>
+    // setup 
+   const data = {
+      labels: ['USA', 'China', 'Japan', 'Germany', 'UK', 'France'],
+      datasets: [{
+        label: 'Sales by countries',
+        data: [100, 75, 50, 90, 120, 80],
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    };
+
+
+    // config 
+    const config = {
+      type: 'bar',
+      data,
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    };
+
+   
+  fetch('sales')
+  .then(response => response.json())
+  .then(data1 => {
+    
+    const intensity = [];
+  
+    const region1 = [];
+
+    const country=[];
+
+    const count1=[];
+
+    // Loop through the data and group by country
+    const groupedData = {};
+     const groupedData2 = {};
+    data1.forEach((item) => {
+      if (item.country) { // check if item.country is truthy before grouping
+        if (!groupedData[item.country]) {
+          groupedData[item.country] = { intensity: 0, count: 0 };
+        }  
+        groupedData[item.country].intensity += item.intensity;
+        groupedData[item.country].count += 1; 
+      }
+    });
+     data1.forEach((item) => {
+     
+      if (item.region) { // check if item.country is truthy before grouping
+        if (!groupedData2[item.region]) {
+          
+          groupedData2[item.region] = { intensity: 0, count: 0 };
+        }  
+      
+        groupedData2[item.region].count += 1; 
+      }
+    });
+  
+ 
+    // Loop through the grouped data to get the intensity and region arrays
+    for (let country in groupedData) {
+       intensity.push(groupedData[country].count);
+      region1.push(country);
+    }
+     
+    myChart.config.data.datasets[0].data = intensity;
+    myChart.config.data.labels = region1;
+   
+    myChart.update();
+     
+for (let region in groupedData2) {
+      count1.push(groupedData2[region].count);
+     
+      country.push(region);
+      
+    }
+console.log(country)
+     myChart2.config.data.datasets[0].data = count1;
+     myChart2.config.data.datasets[0].label="Sales by regions";
+    myChart2.config.data.labels = country;
+   
+    myChart2.update();
+
+  })
+  .catch((err) => {
+    console.log(err)
+  });
+
+    // render init block
+    const myChart = new Chart(
+      document.getElementById('myChart'),
+      config
+    );
+ const myChart2 = new Chart(
+      document.getElementById('myChart2'),
+      config
+    );
+    // Instantly assign Chart.js version
+    const chartVersion = document.getElementById('chartVersion');
+    chartVersion.innerText = Chart.version;
+    </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  </body>
+</html>
